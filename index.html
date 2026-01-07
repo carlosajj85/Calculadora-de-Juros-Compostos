@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora Avançada de Juros Compostos</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary: #2c7be5;
+            --primary-dark: #1a5dc9;
+            --secondary: #00d97e;
+            --dark: #2d3748;
+            --light: #f8f9fa;
+            --gray: #6c757d;
+            --border: #e0e0e0;
+            --shadow: rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+            color: var(--dark);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap: 30px;
+        }
+
+        @media (max-width: 992px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Header e Relógio */
+        .header {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 20px;
+        }
+
+        .title {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .title i {
+            color: var(--secondary);
+        }
+
+        .clock-container {
+            background: var(--dark);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px var(--shadow);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 220px;
+        }
+
+        .clock-title {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .clock {
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .date {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+
+        /* Painel de Entrada */
+        .input-panel {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 8px 25px var(--shadow);
+        }
+
+        .panel-title {
+            font-size: 1.5rem;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--dark);
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark);
+            font-size: 0.95rem;
+        }
+
+        .input-with-icon {
+            position: relative;
+        }
+
+        .input-with-icon i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray);
+        }
+
+        input, select {
+            width: 100%;
+            padding: 14px 15px 14px 45px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            color: var(--dark);
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(44, 123, 229, 0.1);
+        }
+
+        .range-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .range-value {
+            min-width: 60px;
+            text-align: center;
+            background: var(--light);
+            padding: 8px;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+
+        input[type="range"] {
+            padding: 0;
+            flex-grow: 1;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        button {
+            flex: 1;
+            padding: 16px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-calculate {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-calculate:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(44, 123, 229, 0.3);
+        }
+
+        .btn-reset {
+            background: var(--light);
+            color: var(--dark);
+            border: 1px solid var(--border);
+        }
+
+        .btn-reset:hover {
+            background: #e9ecef;
+            transform: translateY(-2px);
+        }
+
+        /* Painel de Resultados */
+        .results-panel {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 8px 25px var(--shadow);
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .results-title {
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--dark);
+        }
+
+        .results-summary {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .results-summary {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .result-card {
+            background: var(--light);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            border-left: 4px solid var(--primary);
+            transition: transform 0.3s ease;
+        }
+
+        .result-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .result-card.green {
+            border-left-color: var(--secondary);
+        }
+
+        .result-card.purple {
+            border-left-color: #9f7aea;
+        }
+
+        .result-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin: 10px 0;
+            color: var(--dark);
+        }
+
+        .result-label {
+            font-size: 0.9rem;
+            color: var(--gray);
+            font-weight: 600;
+        }
+
+        .chart-container {
+            height: 200px;
+            margin: 30px 0;
+            background: var(--light);
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-around;
+            overflow: hidden;
+        }
+
+        .chart-bar {
+            width: 30px;
+            background: linear-gradient(to top, var(--primary), var(--primary-dark));
+            border-radius: 4px 4px 0 0;
+            position: relative;
+            transition: height 1s ease;
+        }
+
+        .chart-bar.invested {
+            background: linear-gradient(to top, var(--secondary), #00b468);
+        }
+
+        .chart-label {
+            position: absolute;
+            bottom: -25px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--gray);
+        }
+
+        /* Tabela */
+        .table-container {
+            margin-top: 30px;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px var(--shadow);
+        }
+
+        thead {
+            background: var(--primary);
+            color: white;
+        }
+
+        th {
+            padding: 16px 12px;
+            text-align: right;
+            font-weight: 600;
+        }
+
+        th:first-child {
+            text-align: left;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+
+        tbody tr:hover {
+            background-color: #e9f2ff;
+        }
+
+        td {
+            padding: 14px 12px;
+            text-align: right;
+            border-bottom: 1px solid var(--border);
+        }
+
+        td:first-child {
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .footer {
+            grid-column: 1 / -1;
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        /* Responsividade */
+        @media (max-width: 576px) {
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 20px;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+            
+            .clock-container {
+                align-self: stretch;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Cabeçalho com relógio -->
+        <div class="header">
+            <div class="title">
+                <i class="fas fa-chart-line"></i>
+                Calculadora de Juros Compostos
+            </div>
+            <div class="clock-container">
+                <div class="clock-title">HORA ATUAL</div>
+                <div class="clock" id="clock">00:00:00</div>
+                <div class="date" id="date">--/--/----</div>
+            </div>
+        </div>
+
+        <!-- Painel de entrada -->
+        <div class="input-panel">
+            <h2 class="panel-title">
+                <i class="fas fa-calculator"></i>
+                Parâmetros do Investimento
+            </h2>
+            
+            <div class="input-group">
+                <label for="capital">Capital Inicial (R$)</label>
+                <div class="input-with-icon">
+                    <i class="fas fa-money-bill-wave"></i>
+                    <input type="number" id="capital" value="1000" min="0" step="100">
+                </div>
+            </div>
+            
+            <div class="input-group">
+                <label for="taxa">Taxa de Juros (%)</label>
+                <div class="range-container">
+                    <div class="input-with-icon" style="flex-grow: 1;">
+                        <i class="fas fa-percentage"></i>
+                        <input type="number" id="taxa" value="1" min="0" max="100" step="0.1">
+                    </div>
+                    <div class="range-value" id="taxaValue">1%</div>
+                </div>
+                <input type="range" id="taxaRange" min="0" max="20" step="0.1" value="1">
+            </div>
+            
+            <div class="input-group">
+                <label for="tipoTaxa">Período da Taxa</label>
+                <div class="input-with-icon">
+                    <i class="fas fa-calendar-alt"></i>
+                    <select id="tipoTaxa">
+                        <option value="mensal">Mensal</option>
+                        <option value="anual">Anual</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="input-group">
+                <label for="periodo">Período de Investimento</label>
+                <div class="range-container">
+                    <div class="input-with-icon" style="flex-grow: 1;">
+                        <i class="fas fa-clock"></i>
+                        <input type="number" id="periodo" value="12" min="1" step="1">
+                    </div>
+                    <div class="range-value" id="periodoValue">12 meses</div>
+                </div>
+                <input type="range" id="periodoRange" min="1" max="360" value="12">
+            </div>
+            
+            <div class="input-group">
+                <label for="tipoPeriodo">Tipo de Período</label>
+                <div class="input-with-icon">
+                    <i class="fas fa-calendar-week"></i>
+                    <select id="tipoPeriodo">
+                        <option value="meses">Meses</option>
+                        <option value="anos">Anos</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="input-group">
+                <label for="aporte">Aporte Mensal (R$)</label>
+                <div class="input-with-icon">
+                    <i class="fas fa-piggy-bank"></i>
+                    <input type="number" id="aporte" value="0" min="0" step="50">
+                </div>
+            </div>
+            
+            <div class="input-group">
+                <label for="momento">Momento do Aporte</label>
+                <div class="input-with-icon">
+                    <i class="fas fa-exchange-alt"></i>
+                    <select id="momento">
+                        <option value="fim">Final do mês</option>
+                        <option value="inicio">Início do mês</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="button-group">
+                <button class="btn-calculate" onclick="calcular()">
+                    <i class="fas fa-chart-bar"></i>
+                    Calcular
+                </button>
+                <button class="btn-reset" onclick="resetar()">
+                    <i class="fas fa-redo"></i>
+                    Limpar
+                </button>
+            </div>
+        </div>
+
+        <!-- Painel de resultados -->
+        <div class="results-panel">
+            <div class="results-header">
+                <h2 class="results-title">
+                    <i class="fas fa-chart-pie"></i>
+                    Resultados da Projeção
+                </h2>
+                <div id="periodoResultado">Período: 12 meses</div>
+            </div>
+            
+            <div class="results-summary">
+                <div class="result-card">
+                    <div class="result-label">Total Investido</div>
+                    <div class="result-value" id="totalInvestido">R$ 0,00</div>
+                    <div class="result-label">Capital + Aportes</div>
+                </div>
+                <div class="result-card green">
+                    <div class="result-label">Juros Totais</div>
+                    <div class="result-value" id="jurosTotais">R$ 0,00</div>
+                    <div class="result-label">Ganho com Juros</div>
+                </div>
+                <div class="result-card purple">
+                    <div class="result-label">Montante Final</div>
+                    <div class="result-value" id="montanteFinal">R$ 0,00</div>
+                    <div class="result-label">Valor Total Acumulado</div>
+                </div>
+            </div>
+            
+            <div class="chart-container" id="chart">
+                <!-- Gráfico será gerado por JavaScript -->
+                <div class="chart-info">Os resultados serão exibidos após o cálculo</div>
+            </div>
+            
+            <div class="table-container">
+                <table id="tabela">
+                    <thead>
+                        <tr>
+                            <th>Mês</th>
+                            <th>Total Investido</th>
+                            <th>Juros do Mês</th>
+                            <th>Saldo Acumulado</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabelaBody">
+                        <!-- Dados da tabela serão inseridos aqui -->
+                        <tr>
+                            <td colspan="4" style="text-align: center; padding: 40px;">
+                                <i class="fas fa-calculator" style="font-size: 2rem; color: #ccc; margin-bottom: 10px; display: block;"></i>
+                                Insira os parâmetros e clique em "Calcular" para ver os resultados
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Calculadora de Juros Compostos &copy; 2023 - Desenvolvida para fins educacionais</p>
+            <p>Os resultados são estimativas e não garantem retornos futuros</p>
+        </div>
+    </div>
+
+    <script>
+        // Atualizar relógio digital
+        function atualizarRelogio() {
+            const agora = new Date();
+            const horas = agora.getHours().toString().padStart(2, '0');
+            const minutos = agora.getMinutes().toString().padStart(2, '0');
+            const segundos = agora.getSeconds().toString().padStart(2, '0');
+            
+            const diasSemana = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'];
+            const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+            
+            const diaSemana = diasSemana[agora.getDay()];
+            const dia = agora.getDate().toString().padStart(2, '0');
+            const mes = meses[agora.getMonth()];
+            const ano = agora.getFullYear();
+            
+            document.getElementById('clock').textContent = `${horas}:${minutos}:${segundos}`;
+            document.getElementById('date').textContent = `${diaSemana}, ${dia} de ${mes} de ${ano}`;
+        }
+        
+        // Atualizar relógio a cada segundo
+        setInterval(atualizarRelogio, 1000);
+        atualizarRelogio();
+        
+        // Sincronizar inputs de range e number
+        document.getElementById('taxa').addEventListener('input', function() {
+            document.getElementById('taxaRange').value = this.value;
+            document.getElementById('taxaValue').textContent = this.value + '%';
+        });
+        
+        document.getElementById('taxaRange').addEventListener('input', function() {
+            document.getElementById('taxa').value = this.value;
+            document.getElementById('taxaValue').textContent = this.value + '%';
+        });
+        
+        document.getElementById('periodo').addEventListener('input', function() {
+            const tipoPeriodo = document.getElementById('tipoPeriodo').value;
+            document.getElementById('periodoRange').value = this.value;
+            document.getElementById('periodoValue').textContent = this.value + (tipoPeriodo === 'meses' ? ' meses' : ' anos');
+        });
+        
+        document.getElementById('periodoRange').addEventListener('input', function() {
+            const tipoPeriodo = document.getElementById('tipoPeriodo').value;
+            document.getElementById('periodo').value = this.value;
+            document.getElementById('periodoValue').textContent = this.value + (tipoPeriodo === 'meses' ? ' meses' : ' anos');
+        });
+        
+        document.getElementById('tipoPeriodo').addEventListener('change', function() {
+            const periodo = document.getElementById('periodo').value;
+            document.getElementById('periodoValue').textContent = periodo + (this.value === 'meses' ? ' meses' : ' anos');
+        });
+        
+        // Função principal de cálculo
+        function calcular() {
+            // Obter valores dos inputs
+            let capital = parseFloat(document.getElementById("capital").value) || 0;
+            let taxa = parseFloat(document.getElementById("taxa").value) / 100 || 0;
+            let tipoTaxa = document.getElementById("tipoTaxa").value;
+            let periodo = parseInt(document.getElementById("periodo").value) || 0;
+            let tipoPeriodo = document.getElementById("tipoPeriodo").value;
+            let aporte = parseFloat(document.getElementById("aporte").value) || 0;
+            let momento = document.getElementById("momento").value;
+            
+            // Validar dados
+            if (capital < 0 || taxa < 0 || periodo <= 0) {
+                alert("Por favor, insira valores válidos para capital, taxa e período.");
+                return;
+            }
+            
+            // Converter taxa anual para mensal se necessário
+            if (tipoTaxa === "anual") {
+                taxa = Math.pow(1 + taxa, 1/12) - 1;
+            }
+            
+            // Converter anos para meses se necessário
+            if (tipoPeriodo === "anos") {
+                periodo = periodo * 12;
+            }
+            
+            // Atualizar o período exibido no resultado
+            document.getElementById("periodoResultado").textContent = `Período: ${periodo} meses`;
+            
+            // Calcular projeção mês a mês
+            let saldo = capital;
+            let totalInvestido = capital;
+            let linhas = "";
+            let jurosAcumulados = 0;
+            
+            // Arrays para o gráfico
+            let saldosMensais = [saldo];
+            let investidosMensais = [totalInvestido];
+            
+            for (let mes = 1; mes <= periodo; mes++) {
+                let jurosMes = 0;
+                
+                // Aporte no início do mês
+                if (momento === "inicio" && mes > 1) {
+                    saldo += aporte;
+                    totalInvestido += aporte;
+                }
+                
+                // Cálculo dos juros
+                jurosMes = saldo * taxa;
+                saldo += jurosMes;
+                jurosAcumulados += jurosMes;
+                
+                // Aporte no final do mês
+                if (momento === "fim") {
+                    saldo += aporte;
+                    totalInvestido += aporte;
+                }
+                
+                // Armazenar valores para o gráfico (a cada 3 meses ou nos últimos 12)
+                if (mes % 3 === 0 || mes > periodo - 12) {
+                    saldosMensais.push(saldo);
+                    investidosMensais.push(totalInvestido);
+                }
+                
+                // Criar linha da tabela para os primeiros 12 meses e últimos 12 meses
+                if (mes <= 12 || mes > periodo - 12) {
+                    let displayMes = mes;
+                    if (tipoPeriodo === "anos") {
+                        displayMes = `${Math.floor((mes-1)/12)+1} ano, ${((mes-1)%12)+1} mês`;
+                    }
+                    
+                    linhas += `
+                        <tr>
+                            <td>${displayMes}</td>
+                            <td>R$ ${totalInvestido.toFixed(2).replace('.', ',')}</td>
+                            <td>R$ ${jurosMes.toFixed(2).replace('.', ',')}</td>
+                            <td>R$ ${saldo.toFixed(2).replace('.', ',')}</td>
+                        </tr>
+                    `;
+                }
+                
+                // Adicionar linha indicando omissão se necessário
+                if (mes === 12 && periodo > 24) {
+                    linhas += `
+                        <tr>
+                            <td colspan="4" style="text-align: center; font-style: italic; color: #888;">
+                                ... ${periodo - 24} meses omitidos ...
+                            </td>
+                        </tr>
+                    `;
+                }
+            }
+            
+            // Calcular totais
+            let jurosTotais = saldo - totalInvestido;
+            
+            // Atualizar cards de resultado
+            document.getElementById("totalInvestido").textContent = `R$ ${totalInvestido.toFixed(2).replace('.', ',')}`;
+            document.getElementById("jurosTotais").textContent = `R$ ${jurosTotais.toFixed(2).replace('.', ',')}`;
+            document.getElementById("montanteFinal").textContent = `R$ ${saldo.toFixed(2).replace('.', ',')}`;
+            
+            // Criar gráfico
+            criarGrafico(saldosMensais, investidosMensais, periodo);
+            
+            // Atualizar tabela
+            document.getElementById("tabelaBody").innerHTML = linhas;
+            
+            // Adicionar linha de total
+            document.getElementById("tabelaBody").innerHTML += `
+                <tr style="background-color: #e9f7ff; font-weight: bold;">
+                    <td>TOTAL (${periodo} meses)</td>
+                    <td>R$ ${totalInvestido.toFixed(2).replace('.', ',')}</td>
+                    <td>R$ ${jurosTotais.toFixed(2).replace('.', ',')}</td>
+                    <td>R$ ${saldo.toFixed(2).replace('.', ',')}</td>
+                </tr>
+            `;
+        }
+        
+        // Função para criar gráfico de barras
+        function criarGrafico(saldos, investidos, periodo) {
+            const chartContainer = document.getElementById("chart");
+            
+            // Limpar gráfico anterior
+            chartContainer.innerHTML = '';
+            
+            // Se não há dados suficientes
+            if (saldos.length < 2) {
+                chartContainer.innerHTML = '<div class="chart-info">Dados insuficientes para exibir o gráfico</div>';
+                return;
+            }
+            
+            // Encontrar valor máximo para escala
+            const maxValor = Math.max(...saldos, ...investidos);
+            
+            // Criar barras
+            for (let i = 0; i < saldos.length; i++) {
+                // Calcular altura das barras (máximo 90% da altura do container)
+                const alturaSaldo = (saldos[i] / maxValor) * 90;
+                const alturaInvestido = (investidos[i] / maxValor) * 90;
+                
+                // Calcular mês correspondente
+                let mesLabel = Math.round((i / (saldos.length - 1)) * periodo);
+                if (mesLabel === 0) mesLabel = "Início";
+                else if (mesLabel === periodo) mesLabel = "Fim";
+                else mesLabel = `${mesLabel}m`;
+                
+                // Criar container para o par de barras
+                const barGroup = document.createElement('div');
+                barGroup.style.display = 'flex';
+                barGroup.style.flexDirection = 'column';
+                barGroup.style.alignItems = 'center';
+                barGroup.style.width = `${70 / saldos.length}%`;
+                barGroup.style.margin = '0 2px';
+                
+                // Barra do total investido
+                const barInvestido = document.createElement('div');
+                barInvestido.className = 'chart-bar invested';
+                barInvestido.style.height = `${alturaInvestido}%`;
+                barInvestido.style.marginBottom = '5px';
+                barInvestido.title = `Investido: R$ ${investidos[i].toFixed(2)}`;
+                
+                // Barra do saldo acumulado
+                const barSaldo = document.createElement('div');
+                barSaldo.className = 'chart-bar';
+                barSaldo.style.height = `${alturaSaldo}%`;
+                barSaldo.title = `Saldo: R$ ${saldos[i].toFixed(2)}`;
+                
+                // Label do mês
+                const label = document.createElement('div');
+                label.className = 'chart-label';
+                label.textContent = mesLabel;
+                
+                // Montar o grupo
+                barGroup.appendChild(barInvestido);
+                barGroup.appendChild(barSaldo);
+                barGroup.appendChild(label);
+                
+                // Adicionar ao container
+                chartContainer.appendChild(barGroup);
+                
+                // Animar as barras
+                setTimeout(() => {
+                    barInvestido.style.transition = 'height 1.5s ease';
+                    barSaldo.style.transition = 'height 1.5s ease';
+                }, 100);
+            }
+            
+            // Adicionar legenda
+            const legend = document.createElement('div');
+            legend.style.display = 'flex';
+            legend.style.justifyContent = 'center';
+            legend.style.marginTop = '30px';
+            legend.style.gap = '20px';
+            legend.style.fontSize = '0.85rem';
+            legend.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 5px;">
+                    <div style="width: 15px; height: 15px; background: linear-gradient(to top, var(--secondary), #00b468); border-radius: 3px;"></div>
+                    <span>Total Investido</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 5px;">
+                    <div style="width: 15px; height: 15px; background: linear-gradient(to top, var(--primary), var(--primary-dark)); border-radius: 3px;"></div>
+                    <span>Saldo Acumulado</span>
+                </div>
+            `;
+            chartContainer.appendChild(legend);
+        }
+        
+        // Função para resetar a calculadora
+        function resetar() {
+            document.getElementById("capital").value = 1000;
+            document.getElementById("taxa").value = 1;
+            document.getElementById("taxaRange").value = 1;
+            document.getElementById("taxaValue").textContent = "1%";
+            document.getElementById("tipoTaxa").value = "mensal";
+            document.getElementById("periodo").value = 12;
+            document.getElementById("periodoRange").value = 12;
+            document.getElementById("periodoValue").textContent = "12 meses";
+            document.getElementById("tipoPeriodo").value = "meses";
+            document.getElementById("aporte").value = 0;
+            document.getElementById("momento").value = "fim";
+            
+            // Limpar resultados
+            document.getElementById("totalInvestido").textContent = "R$ 0,00";
+            document.getElementById("jurosTotais").textContent = "R$ 0,00";
+            document.getElementById("montanteFinal").textContent = "R$ 0,00";
+            document.getElementById("periodoResultado").textContent = "Período: 12 meses";
+            
+            // Limpar gráfico e tabela
+            document.getElementById("chart").innerHTML = '<div class="chart-info">Os resultados serão exibidos após o cálculo</div>';
+            document.getElementById("tabelaBody").innerHTML = `
+                <tr>
+                    <td colspan="4" style="text-align: center; padding: 40px;">
+                        <i class="fas fa-calculator" style="font-size: 2rem; color: #ccc; margin-bottom: 10px; display: block;"></i>
+                        Insira os parâmetros e clique em "Calcular" para ver os resultados
+                    </td>
+                </tr>
+            `;
+        }
+        
+        // Inicializar a calculadora com um cálculo padrão
+        window.onload = function() {
+            calcular();
+        };
+    </script>
+</body>
+</html>
